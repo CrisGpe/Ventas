@@ -1,0 +1,72 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  :root {
+    --primary-color: #2c3e50;
+    --accent-color: #e67e22;
+  }
+  
+  body { 
+    background-color: #f8f9fa; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .card {
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-header {
+    background-color: var(--primary-color) !important;
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Estilo para los radio buttons tipo "Chip" */
+  .btn-check:checked + .btn-outline-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Animación de carga */
+  #loader {
+    display: none;
+  }
+  /* Spinner más sutil */
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+    margin-right: 5px;
+  }
+
+  /* Estilo para los inputs editables en la tabla de venta */
+  .table input[type="number"] {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    background-color: #fff;
+    transition: all 0.2s;
+  }
+
+  .table input[type="number"]:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.2rem rgba(230, 126, 34, 0.25);
+    outline: none;
+  }
+
+  /* Evitar que el botón de venta "baile" cuando carga */
+  #venta-tab {
+    min-width: 120px;
+    transition: all 0.3s ease;
+  }
+</style>

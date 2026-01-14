@@ -1,0 +1,79 @@
+<script>
+  // Estado global de la aplicación
+  const APP_STATE = {
+    catalogoCargado: false,
+    configCargada: false,
+    productos: [],
+    emisores: [],
+    documentos: []
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    inicializarSistema();
+    // Escuchar cambios de pestaña
+    const tabEls = document.querySelectorAll('button[data-bs-toggle="pill"]');
+    tabEls.forEach(tab => {
+      tab.addEventListener('shown.bs.tab', (e) => {
+        if (e.target.getAttribute('data-bs-target') === '#dashboard') {
+          if(typeof cargarVentasDia === 'function') cargarVentasDia();
+        }
+      });
+    });
+  });
+
+  function inicializarSistema() {
+    showLoadingSpinner(true);
+    
+    // Carga de Productos
+    google.script.run
+      .withSuccessHandler(data => {
+        APP_STATE.productos = data;
+        APP_STATE.catalogoCargado = true;
+        checkCargaCompleta();
+      })
+      .obtenerCatalogoMaestro();
+
+    // Carga de Configuración (Emisores)
+    google.script.run
+      .withSuccessHandler(config => {
+        APP_STATE.emisores = config.emisores;
+        APP_STATE.documentos = config.tiposDocumento;
+        APP_STATE.configCargada = true;
+        poblarSelectoresDinamicos();
+        checkCargaCompleta();
+      })
+      .obtenerConfiguracionEmisores();
+  }
+
+  function poblarSelectoresDinamicos() {
+    const selectEmisor = document.getElementById('venta_emisor');
+    const selectDoc = document.getElementById('venta_comprobante');
+    
+    if (selectEmisor) {
+      selectEmisor.innerHTML = '<option value="" selected disabled>Punto de Emisión...</option>' + 
+        APP_STATE.emisores.map(e => `<option value="${e}">${e}</option>`).join('');
+    }
+    
+    if (selectDoc) {
+      selectDoc.innerHTML = APP_STATE.documentos.map(d => 
+        `<option value="${d}">${d.replace('Correlativo ', '')}</option>`
+      ).join('');
+    }
+  }
+
+  function checkCargaCompleta() {
+    if (APP_STATE.catalogoCargado && APP_STATE.configCargada) {
+      showLoadingSpinner(false);
+      console.log("✅ UI de Ventas lista");
+    }
+  }
+
+  function showLoadingSpinner(show) {
+    const btnVenta = document.getElementById('venta-tab');
+    if (!btnVenta) return;
+    btnVenta.innerHTML = show ? 
+      `<span class="spinner-border spinner-border-sm"></span> SINCRO...` : 
+      `<i class="bi bi-cart3 me-1"></i> VENTA`;
+    btnVenta.classList.toggle('disabled', show);
+  }
+</script>

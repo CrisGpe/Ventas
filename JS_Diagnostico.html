@@ -1,0 +1,35 @@
+<script>
+  function handleFormSubmit(formObject) {
+    const btn = document.getElementById('btnEnviar');
+    const loader = document.getElementById('loader');
+    const btnText = document.getElementById('btnText');
+    const feedback = document.getElementById('feedbackMessage');
+
+    // Estado de carga
+    btn.disabled = true;
+    loader.style.display = 'inline-block';
+    btnText.innerText = 'Procesando...';
+    feedback.innerHTML = '';
+
+    google.script.run
+      .withSuccessHandler((response) => {
+          btn.disabled = false;
+          loader.style.display = 'none';
+          btnText.innerText = 'Guardar Ficha';
+          
+          if(response === "Éxito") {
+            feedback.innerHTML = `<div class="alert alert-success shadow-sm">✅ ¡Ficha guardada correctamente!</div>`;
+            formObject.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            feedback.innerHTML = `<div class="alert alert-danger shadow-sm">❌ ${response}</div>`;
+          }
+      })
+      .withFailureHandler((err) => {
+          btn.disabled = false;
+          loader.style.display = 'none';
+          feedback.innerHTML = `<div class="alert alert-danger shadow-sm">❌ Error crítico: ${err}</div>`;
+      })
+      .procesarFormulario(formObject);
+  }
+</script>

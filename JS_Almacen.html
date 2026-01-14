@@ -1,0 +1,166 @@
+<script>
+  let itemsFactura = [];
+
+  /**
+   * BUSCADOR PARA ALMACÉN (Ingreso Factura)
+   * Se apoya en el estado global ya cargado
+   */
+  function buscarProductoAlmacen(query) {
+    const q = query.toLowerCase();
+    const resultados = APP_STATE.productos.filter(p => 
+      (p.descripcion || "").toLowerCase().includes(q) || 
+      (p.sku || "").toString().toLowerCase().includes(q)
+    ).slice(0, 5);
+    
+    // Aquí podrías renderizar una lista de sugerencias similar a la de Ventas
+    return resultados;
+  }
+
+  /**
+   * Al seleccionar un producto para ingresar factura
+   */
+  function seleccionarParaFactura(producto) {
+    console.log("📦 Seleccionando para factura:", producto);
+    
+    const existe = itemsFactura.find(item => item.sku === producto.sku);
+    if (existe) {
+        alert("Este producto ya está en la lista.");
+        return;
+    }
+
+    itemsFactura.push({
+      sku: producto.sku,
+      descripcion: producto.descripcion,
+      costo_actual: producto.costo_unitario || 0,
+      costo_nuevo: producto.costo_unitario || 0,
+      cantidad: 1
+    });
+    
+    renderizarListaFactura();
+  }
+
+  function renderizarListaFactura() {
+    const contenedor = document.getElementById('listaItemsFactura');
+    if (itemsFactura.length === 0) {
+      contenedor.innerHTML = '<p class="text-center text-muted small py-3">Busque y seleccione productos</p>';
+      return;
+    }
+
+    let html = `
+      <table class="table table-sm align-middle mt-2" style="font-size: 0.85rem;">
+        <thead class="table-light">
+          <tr>
+            <th>Producto</th>
+            <th style="width: 80px;">Cant.</th>
+            <th style="width: 110px;">Costo S/</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+    itemsFactura.forEach((item, index) => {
+      html += `
+        <tr>
+          <td>
+            <div class="fw-bold text-truncate" style="max-width: 150px;">${item.descripcion}</div>
+            <small class="text-muted">${item.sku}</small>
+          </td>
+          <td>
+            <input type="number" class="form-control form-control-sm" 
+                   value="${item.cantidad}" onchange="actualizarItemFactura(${index}, 'cantidad', this.value)">
+          </td>
+          <td>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">S/</span>
+              <input type="number" step="0.01" class="form-control" 
+                     value="${item.costo_nuevo}" onchange="actualizarItemFactura(${index}, 'costo_nuevo', this.value)">
+            </div>
+          </td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-danger border-0" onclick="quitarDeFactura(${index})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>`;
+    });
+
+    html += '</tbody></table>';
+    contenedor.innerHTML = html;
+  }
+
+  function actualizarItemFactura(index, propiedad, valor) {
+    const val = parseFloat(valor);
+    console.log(`Log: Actualizando ${propiedad} a ${val} en item factura ${index}`);
+    itemsFactura[index][propiedad] = val;
+  }
+
+  /**
+   * TRASPASOS: Función para cargar datos del producto seleccionado al mini-formulario
+   */
+  function prepararTraspaso(producto) {
+    console.log("🔄 Preparando traspaso para:", producto);
+    
+    document.getElementById('traspaso_sku').value = producto.sku;
+    document.getElementById('traspaso_nombre').innerText = producto.descripcion;
+    
+    // Estos IDs deben existir en tu UI_Almacen (puedes usar <span> o <strong>)
+    const labelP = document.getElementById('stockP_actual');
+    const labelT = document.getElementById('stockT_actual');
+    
+    if(labelP) labelP.innerText = producto.stock_principal;
+    if(labelT) labelT.innerText = producto.stock_tienda;
+  }
+
+  function ejecutarTraspaso() {
+    const btn = event.target;
+    const sku = document.getElementById('traspaso_sku').value;
+    const cant = parseFloat(document.getElementById('traspaso_cantidad').value);
+    const stockPrincipal = parseFloat(document.getElementById('stockP_actual').innerText || 0);
+
+    if (!sku || isNaN(cant) || cant <= 0) {
+      alert("⚠️ Seleccione un producto y una cantidad válida.");
+      return;
+    }
+
+    if (cant > stockPrincipal) {
+      alert(`❌ Error: Solo hay ${stockPrincipal} unidades en Principal.`);
+      return;
+    }
+
+    const payload = {
+      tipo: 'TRASPASO',
+      origen: 'ALMACEN_PRINCIPAL',
+      destino: 'ALMACEN_TIENDA',
+      documento: 'TR-' + new Date().getTime(),
+      items: [{
+        sku: sku,
+        descripcion: document.getElementById('traspaso_nombre').innerText,
+        cantidad: cant
+      }]
+    };
+
+    console.log("📡 Enviando Traspaso al servidor:", payload);
+    btn.disabled = true;
+
+    google.script.run
+      .withSuccessHandler(res => {
+        alert("✅ Traspaso completado con éxito");
+        cargarCatalogo(); // Recargamos para ver los nuevos stocks
+        limpiarFormTraspaso();
+        btn.disabled = false;
+      })
+      .withFailureHandler(err => {
+        alert("❌ Error en traspaso: " + err);
+        btn.disabled = false;
+      })
+      .procesarMovimientoAlmacen(payload);
+  }
+
+  function limpiarFormTraspaso() {
+    document.getElementById('traspaso_sku').value = '';
+    document.getElementById('traspaso_cantidad').value = '';
+    document.getElementById('traspaso_nombre').innerText = '---';
+    if(document.getElementById('stockP_actual')) document.getElementById('stockP_actual').innerText = '0';
+    if(document.getElementById('stockT_actual')) document.getElementById('stockT_actual').innerText = '0';
+  }
+</script>

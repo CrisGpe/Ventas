@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema ERP Capilar</title>
+    <?!= include('topCSS'); ?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-light pb-5">
+
+    <nav class="bg-white shadow-sm sticky-top mb-4">
+        <div class="container py-2">
+            <ul class="nav nav-pills nav-fill gap-2 p-1 bg-gray-100 rounded" id="mainTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active py-2" id="venta-tab" data-bs-toggle="pill" data-bs-target="#venta" type="button">
+                        <i class="bi bi-cart3 me-1"></i> VENTA
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link py-2" id="diagnostico-tab" data-bs-toggle="pill" data-bs-target="#diagnostico" type="button">
+                        <i class="bi bi-clipboard2-pulse me-1"></i> DIAGNÓSTICO
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link py-2" id="almacen-tab" data-bs-toggle="pill" data-bs-target="#almacen" type="button">
+                        <i class="bi bi-box-seam me-1"></i> ALMACÉN
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link py-2" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard" type="button">
+                        <i class="bi bi-box-seam me-1"></i> DASHBOARD
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="tab-content" id="mainTabContent">
+            <div class="tab-pane fade show active" id="venta" role="tabpanel">
+                <?!= include('UI_Venta'); ?>
+            </div>
+            <div class="tab-pane fade" id="diagnostico" role="tabpanel">
+                <?!= include('UI_diagnostico'); ?>
+            </div>
+            <div class="tab-pane fade" id="almacen" role="tabpanel">
+                <?!= include('UI_Almacen'); ?>
+            </div>
+            <div class="tab-pane fade" id="dashboard" role="tabpanel">
+                <?!= include('UI_Dashboard'); ?>
+            </div>
+        </div>
+    </main>
+
+    <?!= include('JS_Pestanas'); ?>
+    <?!= include('JS_Venta'); ?>
+    <?!= include('JS_Diagnostico'); ?>
+    <?!= include('JS_Almacen'); ?>
+    <?!= include('JS_Dashboard'); ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

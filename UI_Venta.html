@@ -1,0 +1,170 @@
+<style>
+  /* Estilos para que el stock destaque en las sugerencias */
+  .stock-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .lista-sugerencias-container {
+    z-index: 1050; 
+    display: none; 
+    max-height: 400px; 
+    overflow-y: auto;
+    border-radius: 0 0 10px 10px;
+  }
+</style>
+
+<div class="container-fluid py-3" style="max-width: 1400px;">
+    <div class="row g-4">
+        
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h3 class="h5 mb-0 text-primary fw-bold"><i class="bi bi-cart-plus me-2"></i>1. Preparación de la Orden</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form id="ventaForm">
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-7">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="venta_nombre" name="nombre_cliente" placeholder="Nombre" required>
+                                    <label for="venta_nombre">Nombre del Cliente</label>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-floating">
+                                    <select class="form-select" id="venta_asesor" name="asesor" required>
+                                        <option value="" selected disabled>Seleccione asesor...</option>
+                                        <option value="Asesor 1">Asesor 1</option>
+                                        <option value="Asesor 2">Asesor 2</option>
+                                    </select>
+                                    <label for="venta_asesor">Asesor que atiende</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded border mb-4">
+                            <label class="form-label fw-bold text-dark d-block mb-3 small text-uppercase tracking-wider">Expectativas del Servicio</label>
+                            <div class="row g-3">
+                                <div class="col-md-6 border-end">
+                                    <span class="d-block small text-muted mb-2">Cosmética:</span>
+                                    <div id="cont-exp-cosmetica" class="d-flex flex-wrap gap-2">
+                                        <input type="checkbox" class="btn-check" name="exp_cosmetica" id="v_suavidad" value="Suavidad">
+                                        <label class="btn btn-outline-primary btn-sm px-3" for="v_suavidad">Suavidad</label>
+                                        <input type="checkbox" class="btn-check" name="exp_cosmetica" id="v_color" value="Color">
+                                        <label class="btn btn-outline-primary btn-sm px-3" for="v_color">Color</label>
+                                        <input type="checkbox" class="btn-check" name="exp_cosmetica" id="v_brillo" value="Brillo">
+                                        <label class="btn btn-outline-primary btn-sm px-3" for="v_brillo">Brillo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <span class="d-block small text-muted mb-2">Forma:</span>
+                                    <div id="cont-exp-forma" class="d-flex flex-wrap gap-2">
+                                        <input type="checkbox" class="btn-check" name="exp_forma" id="v_volumen" value="Volumen">
+                                        <label class="btn btn-outline-primary btn-sm px-3" for="v_volumen">Volumen</label>
+                                        <input type="checkbox" class="btn-check" name="exp_forma" id="v_liso" value="Liso">
+                                        <label class="btn btn-outline-primary btn-sm px-3" for="v_liso">Liso</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="position-relative">
+                                <div class="input-group shadow-sm border-primary">
+                                    <span class="input-group-text bg-white border-end-0 text-primary">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" id="inputBusquedaGlobal" class="form-control border-start-0 ps-0" 
+                                           placeholder="Buscar por SKU, Marca o Nombre..." autocomplete="off">
+                                </div>
+                                <ul id="listaSugerencias" class="list-group position-absolute w-100 shadow-lg lista-sugerencias-container">
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive bg-white rounded border" style="min-height: 250px;">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th class="text-center" style="width: 80px;">Cant.</th>
+                                        <th class="text-end" style="width: 140px;">Precio</th>
+                                        <th class="text-end" style="width: 100px;">Subtotal</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaProductosVenta">
+                                    <tr><td colspan="5" class="text-center py-4 text-muted small">No hay productos en la orden</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-dark text-white py-3 text-center">
+                    <h3 class="h5 mb-0 fw-bold"><i class="bi bi-cash-stack me-2"></i>2. Panel de Cobro</h3>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <div class="mb-4 p-3 bg-light rounded border">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Punto de Emisión</label>
+                                <select id="venta_emisor" class="form-select border-primary shadow-sm">
+                                    <option value="" disabled selected>Seleccione Emisor...</option>
+                                    <option value="CAJA_TIENDA">Caja Tienda</option>
+                                    <option value="CAJA_PRINCIPAL">Caja Principal</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Comprobante</label>
+                                <select id="venta_comprobante" class="form-select shadow-sm">
+                                    <option value="Correlativo Nota">Nota de Venta</option>
+                                    <option value="Correlativo Boleta">Boleta</option>
+                                    <option value="Correlativo Factura">Factura</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small">Método de Pago</label>
+                                <select id="venta_metodo" class="form-select shadow-sm">
+                                    <option value="EFECTIVO">Efectivo</option>
+                                    <option value="YAPE/PLIN">Yape / Plin</option>
+                                    <option value="TARJETA">Tarjeta</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 px-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">Subtotal:</span>
+                            <span class="fw-medium" id="txt_subtotal">S/ 0.00</span>
+                        </div>
+                        <hr class="my-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0 fw-bold text-dark">TOTAL A COBRAR:</span>
+                            <span class="h3 mb-0 fw-bold text-success" id="totalVenta">S/ 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" id="btnFinalizarVenta" onclick="ejecutarFinalizarVenta()" 
+                                class="btn btn-success btn-lg py-3 shadow-sm fw-bold">
+                            <i class="bi bi-check-circle me-2"></i> FINALIZAR Y COBRAR
+                        </button>
+                        <button type="button" onclick="limpiarFormularioVenta()" class="btn btn-link btn-sm text-muted text-decoration-none">
+                            Cancelar y Limpiar Orden
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

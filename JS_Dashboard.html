@@ -1,0 +1,71 @@
+<script>
+  function verDetalleVenta(nroComprobante) {
+    console.log("🔍 Buscando detalle de:", nroComprobante);
+    
+    google.script.run
+      .withSuccessHandler(function(items) {
+        let html = `<h5>Detalle: ${nroComprobante}</h5>
+                    <table class="table table-sm">
+                      <thead>
+                        <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr>
+                      </thead>
+                      <tbody>`;
+        
+        let total = 0;
+        items.forEach(item => {
+          let sub = item.cantidad * item.precio;
+          total += sub;
+          html += `<tr>
+                    <td>${item.descripcion}</td>
+                    <td>${item.cantidad}</td>
+                    <td>S/ ${item.precio.toFixed(2)}</td>
+                    <td>S/ ${sub.toFixed(2)}</td>
+                  </tr>`;
+        });
+        
+        html += `</tbody>
+                <tfoot><tr><th colspan="3">TOTAL</th><th>S/ ${total.toFixed(2)}</th></tr></tfoot>
+                </table>`;
+        
+        document.getElementById('contenidoDetalleVenta').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('modalDetalleVenta')).show();
+      })
+      .obtenerDetallePorComprobante(nroComprobante);
+  }
+  function cargarVentasDia() {
+    const contenedor = document.getElementById('listaVentasDia');
+    if (contenedor) contenedor.innerHTML = '<tr><td colspan="6" class="text-center">Cargando ventas...</td></tr>';
+
+    google.script.run
+      .withSuccessHandler(function(ventas) {
+        if (!ventas || ventas.length === 0) {
+          contenedor.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay ventas registradas hoy.</td></tr>';
+          return;
+        }
+
+        let html = '';
+        ventas.forEach(v => {
+          // v = [Fecha, Comprobante, Cliente, Tipo, Total, Metodo, Asesor, Emisor]
+          const fecha = new Date(v[0]);
+          const hora = fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0');
+          
+          html += `
+            <tr>
+              <td><small>${hora}</small></td>
+              <td><span class="badge bg-light text-dark border">${v[7]}</span></td>
+              <td><strong>${v[1]}</strong><br><small class="text-muted">${v[2]}</small></td>
+              <td class="fw-bold text-success">S/ ${parseFloat(v[4]).toFixed(2)}</td>
+              <td><small class="badge bg-info-subtle text-info border border-info-subtle">${v[5]}</small></td>
+              <td>
+                <button onclick="verDetalleVenta('${v[1]}')" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>`;
+        });
+        contenedor.innerHTML = html;
+      })
+      .withFailureHandler(err => console.error("Error al cargar ventas:", err))
+      .obtenerVentasDelDia();
+  }
+</script>
